@@ -1,0 +1,72 @@
+import {CATEGORIES,PROVIDERS,REVIEWS} from './data.js';
+import {getState,setState,addTask,toggleSaved,addRecent} from './state.js';
+import {esc,stars,modal,button,empty} from './ui.js';
+
+const root=document.getElementById('app');
+const initials=name=>name.split(' ').map(x=>x[0]).join('').slice(0,2);
+const providerCard=p=>{
+ const s=getState(),saved=s.saved.includes(p.id);
+ return '<article class="provider"><div class="p-top"><div class="avatar">'+esc(initials(p.name))+'</div><div><b>'+esc(p.name)+'</b> '+(p.verified?'<span class="verified">Verified</span>':'')+'<div class="muted">'+esc(p.role)+'</div><div class="rating">'+stars(p.rating)+' '+p.rating+' · '+p.jobs+' jobs</div></div></div><p>'+esc(p.bio)+'</p><div class="tags">'+p.skills.map(x=>'<span class="tag">'+esc(x)+'</span>').join('')+'</div><div class="provider-foot"><span class="muted">'+esc(p.location)+'</span><div>'+button(saved?'Saved':'Save','save:'+p.id,'secondary')+' '+button('View & hire','hire:'+p.id,'primary')+'</div></div></article>';
+};
+function nav(){
+ return '<div class="top">Verified providers · Protected jobs · Services across Nigeria</div><nav class="nav"><a class="brand" href="#home">next<span>hub</span></a><button class="nav-link" data-action="go:discover">Find a service</button><button class="nav-link" data-action="go:providers">Providers</button><button class="nav-link" data-action="post-task">Post a task</button><button class="nav-link" data-action="go:jobs">My jobs</button><button class="nav-link" data-action="go:profile">Profile</button><button class="btn primary" data-action="join">Join as a provider</button><button class="btn mobile-menu" data-action="menu">Menu</button></nav>';
+}
+function home(){
+ return '<section class="hero" id="home"><div><div class="eyebrow">One marketplace. Any legitimate service.</div><h1>Need something done? Find someone.</h1><p class="lead">Hire skilled professionals, local businesses and everyday service providers for work at home, online or anywhere in Nigeria.</p><div class="searchbar"><input id="global-search" value="'+esc(getState().query)+'" placeholder="Try “AC repair in Ikeja” or “logo designer”" aria-label="Search services"><button data-action="search">Search</button></div><div class="chips">'+['Cleaner','Driver','Plumber','Web developer','CCTV installation'].map(x=>'<button class="chip" data-action="quick:'+esc(x)+'">'+esc(x)+'</button>').join('')+'<button class="chip" data-action="post-task">My service isn’t listed</button></div></div><aside class="hero-side"><h2>Not a closed directory.</h2><p>Providers can offer multiple services. Customers can describe a job even when the catalogue has never seen that service before.</p><div class="metrics"><div class="metric"><b>17</b><span>starting service groups</span></div><div class="metric"><b>∞</b><span>custom service potential</span></div><div class="metric"><b>4.9</b><span>sample rating</span></div><div class="metric"><b>24/7</b><span>task posting</span></div></div></aside></section>';
+}
+function categories(){
+ return '<section class="section" id="discover"><div class="section-head"><div><h2>Browse the marketplace</h2><div class="muted">Start broad. Search naturally. New legitimate services can be added through moderation.</div></div><button class="btn primary" data-action="post-task">Post a custom task</button></div><div class="category-grid">'+CATEGORIES.map(c=>'<button class="category" data-action="category:'+c.id+'"><span class="cat-icon">'+c.icon+'</span><strong>'+esc(c.name)+'</strong><p>'+esc(c.desc)+'</p></button>').join('')+'</div></section>';
+}
+function providerSection(id='providers'){
+ return '<section class="section" id="'+id+'"><div class="section-head"><div><h2>Providers you can hire</h2><div class="muted">Compare skills, location, ratings, completed jobs, services and work examples.</div></div></div><div class="toolbar"><input class="field" id="provider-search" placeholder="Search service, skill or provider"><input class="field" id="provider-location" placeholder="Location e.g. Ikeja, Lagos"><select class="field" id="provider-sort"><option value="relevant">Relevant</option><option value="rating">Highest rating</option><option value="jobs">Most jobs</option></select></div><div class="provider-grid" id="provider-results">'+PROVIDERS.map(providerCard).join('')+'</div></section>';
+}
+function how(){
+ return '<section class="section"><div class="section-head"><h2>How Nexthub works</h2></div><div class="category-grid"><div class="panel"><b>01 · Describe the work</b><p class="muted">Choose a catalogue service or create a custom task.</p></div><div class="panel"><b>02 · Compare people</b><p class="muted">Use ratings, verification, skills, price, location and portfolio evidence.</p></div><div class="panel"><b>03 · Agree the job</b><p class="muted">Confirm scope, timing, location and price before booking.</p></div><div class="panel"><b>04 · Complete & review</b><p class="muted">Track the job and leave a useful review when finished.</p></div></div></section>';
+}
+function jobs(){
+ const tasks=getState().tasks;
+ return '<section class="section" id="jobs"><div class="section-head"><h2>My jobs</h2><button class="btn primary" data-action="post-task">New task</button></div><div class="stats"><div class="stat"><b>'+tasks.filter(x=>x.status==='Open').length+'</b><span>Open tasks</span></div><div class="stat"><b>1</b><span>Upcoming</span></div><div class="stat"><b>8</b><span>Completed</span></div><div class="stat"><b>₦184k</b><span>Sample spend</span></div></div><div class="panel" style="margin-top:14px">'+(tasks.length?tasks.map(t=>'<div class="job"><div><b>'+esc(t.title)+'</b><div class="muted">'+esc(t.location||'Nigeria')+' · '+esc(t.category||'Custom service')+'</div></div><span class="badge">'+esc(t.status)+'</span></div>').join(''):'<div class="job"><div><b>Generator servicing</b><div class="muted">Chinedu Okafor · Tomorrow · Ikeja</div></div><span class="badge">Confirmed</span></div>')+'</div></section>';
+}
+function profile(){
+ const s=getState(),saved=PROVIDERS.filter(p=>s.saved.includes(p.id));
+ return '<section class="section" id="profile"><div class="section-head"><h2>Your profile</h2><button class="btn primary" data-action="join">Become a provider</button></div><div class="profile-grid"><div class="panel"><div class="avatar" style="width:76px;height:76px">'+esc(initials(s.profile.name))+'</div><h3>'+esc(s.profile.name)+'</h3><p class="muted">'+esc(s.profile.role)+' · '+esc(s.profile.location)+'</p><span class="verified">Phone ready</span> <span class="verified">Email ready</span></div><div class="panel"><h3>Saved providers</h3>'+(saved.length?saved.map(p=>'<div class="job"><div><b>'+esc(p.name)+'</b><div class="muted">'+esc(p.role)+'</div></div><button class="btn small" data-action="hire:'+p.id+'">Hire</button></div>').join(''):empty('Nothing saved yet','Save providers you want to compare later.','go:providers'))+'</div></div></section>';
+}
+function footer(){return '<footer class="footer"><div class="brand">next<span>hub</span></div><p>Find someone. Get it done.</p><small>Open marketplace for legitimate services in Nigeria. The catalogue is extensible: new service proposals can be moderated into the marketplace without changing the core product.</small></footer>'}
+function taskModal(){
+ return modal('<button class="modal-close" data-action="close">×</button><h2>Post a task</h2><p class="muted">Describe what you need. It can be a service we already list or something completely new.</p><form class="form" id="task-form"><label>What do you need?<input name="title" required placeholder="e.g. Install CCTV at my office"></label><div class="two"><label>Category<select name="category">'+CATEGORIES.map(c=>'<option>'+esc(c.name)+'</option>').join('')+'</select></label><label>When<input name="date" type="date"></label></div><div class="two"><label>Location<input name="location" placeholder="Ikeja, Lagos"></label><label>Budget<input name="budget" inputmode="numeric" placeholder="₦50,000"></label></div><label>Describe the work<textarea name="description" required placeholder="Requirements, quantity, access details and preferred skills..."></textarea></label><label>Urgency<select name="urgency"><option>Flexible</option><option>This week</option><option>Urgent</option></select></label><div class="notice">Do not post passwords, bank PINs, private identity documents or other sensitive information.</div><button class="btn primary" type="submit">Post task</button></form></div>');
+}
+function providerModal(){
+ return modal('<button class="modal-close" data-action="close">×</button><h2>Join Nexthub as a provider</h2><p class="muted">Build one profile and add as many legitimate services as you offer.</p><form class="form" id="provider-form"><div class="two"><label>Name or business<input name="name" required placeholder="Your name or business"></label><label>Location<input name="location" required placeholder="Lagos, Abuja, Port Harcourt..."></label></div><label>Main service<input name="service" required placeholder="e.g. CCTV installation"></label><label>Other services<input name="other" placeholder="e.g. networking, alarm systems"></label><label>About you<textarea name="about" placeholder="Experience, qualifications, customers served..."></textarea></label><label>Portfolio/work examples<input name="portfolio" placeholder="Optional links or short description"></label><div class="notice">Production verification can cover phone, identity, business registration and service-specific qualifications where applicable.</div><button class="btn primary" type="submit">Create provider profile</button></form></div>');
+}
+function hireModal(p){return modal('<button class="modal-close" data-action="close">×</button><h2>Request '+esc(p.name)+'</h2><p class="muted">'+esc(p.role)+' · '+esc(p.location)+' · '+p.rating+'★</p><form class="form" id="hire-form"><input type="hidden" name="provider" value="'+esc(p.id)+'"><label>What do you need?<textarea name="description" required placeholder="Describe the exact job"></textarea></label><div class="two"><label>Date<input name="date" type="date"></label><label>Budget<input name="budget" placeholder="₦"></label></div><label>Job location<input name="location" value="'+esc(p.location)+'"></label><button class="btn primary" type="submit">Send request</button></form></div>');}
+function showModal(html){document.body.insertAdjacentHTML('beforeend',html);document.getElementById('modal')?.querySelector('input,textarea')?.focus()}
+function closeModal(){document.getElementById('modal')?.remove()}
+function render(){root.innerHTML=nav()+'<main class="app">'+home()+categories()+providerSection()+how()+jobs()+profile()+'</main>'+footer();wire()}
+function filter(){
+ const q=(document.getElementById('provider-search')?.value||getState().query).toLowerCase();
+ const loc=(document.getElementById('provider-location')?.value||'').toLowerCase();
+ let list=PROVIDERS.filter(p=>(p.name+' '+p.role+' '+p.location+' '+p.skills.join(' ')+' '+p.services.join(' ')).toLowerCase().includes(q)&&(!loc||p.location.toLowerCase().includes(loc)));
+ const sort=document.getElementById('provider-sort')?.value;if(sort==='rating')list.sort((a,b)=>b.rating-a.rating);if(sort==='jobs')list.sort((a,b)=>b.jobs-a.jobs);
+ const el=document.getElementById('provider-results');if(el)el.innerHTML=list.length?list.map(providerCard).join(''):empty('No exact match yet','Try another search or post a custom task so providers can respond.','post-task');
+}
+function wire(){
+ root.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>action(b.dataset.action)));
+ document.getElementById('global-search')?.addEventListener('keydown',e=>{if(e.key==='Enter')action('search')});
+ ['provider-search','provider-location','provider-sort'].forEach(id=>document.getElementById(id)?.addEventListener('input',filter));
+}
+function action(a){
+ if(a==='close'){closeModal();return}
+ if(a==='search'){const q=document.getElementById('global-search')?.value.trim()||'';setState({query:q});addRecent(q);filter();document.getElementById('providers')?.scrollIntoView();return}
+ if(a.startsWith('quick:')){const q=a.slice(6);setState({query:q});render();document.getElementById('global-search').value=q;filter();document.getElementById('providers')?.scrollIntoView();return}
+ if(a.startsWith('go:')){document.getElementById(a.slice(3))?.scrollIntoView();return}
+ if(a==='post-task'){showModal(taskModal());document.getElementById('task-form')?.addEventListener('submit',submitTask);return}
+ if(a==='join'){showModal(providerModal());document.getElementById('provider-form')?.addEventListener('submit',submitProvider);return}
+ if(a.startsWith('save:')){toggleSaved(a.slice(5));render();return}
+ if(a.startsWith('hire:')){const p=PROVIDERS.find(x=>x.id===a.slice(5));if(p){showModal(hireModal(p));document.getElementById('hire-form')?.addEventListener('submit',submitHire)}return}
+ if(a.startsWith('category:')){const c=CATEGORIES.find(x=>x.id===a.slice(9));if(c){setState({query:c.name});render();document.getElementById('provider-search').value=c.name;filter();document.getElementById('providers')?.scrollIntoView()}}
+}
+function submitTask(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));addTask({title:d.title,category:d.category,location:d.location,budget:d.budget,description:d.description,date:d.date,urgency:d.urgency});closeModal();render();document.getElementById('jobs')?.scrollIntoView();alert('Task posted successfully in this browser demo.')}
+function submitProvider(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));setState({profile:{name:d.name,location:d.location,role:'Provider'}});closeModal();render();document.getElementById('profile')?.scrollIntoView();alert('Provider profile saved locally.')}
+function submitHire(e){e.preventDefault();const p=PROVIDERS.find(x=>x.id===e.target.provider.value);addTask({title:'Request for '+p.role,category:'Provider request',location:e.target.location.value,description:e.target.description.value,budget:e.target.budget.value,status:'Requested',provider:p.name});closeModal();render();document.getElementById('jobs')?.scrollIntoView();alert('Request saved. A production backend will deliver it to the provider.')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+render();
