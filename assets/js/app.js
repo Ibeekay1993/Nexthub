@@ -1,6 +1,6 @@
 import {CATEGORIES,PROVIDERS} from './data.js';
 import {getState,setState,addTask,toggleSaved,addRecent} from './state.js';
-import {layout,home,services,service,providers,provider,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,forgot,adminSection,notFound} from './pages.js';
+import {layout,home,services,service,providers,provider,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,profilePage,forgot,adminSection,notFound} from './pages.js';
 
 const root=document.getElementById('app');
 const go=path=>{location.hash=path.startsWith('#')?path:'#'+path};
@@ -33,7 +33,7 @@ function render(){
  else if(r.path==='provider'&&r.id==='earnings')body=providerSimple('Earnings & payouts','Review completed work and payout status.',[['Completed jobs','₦680,000','Available'],['Pending jobs','₦420,000','Pending'],['Platform fees','₦68,000','This month']]);
  else if(r.path==='provider'&&r.id==='verification')body=providerSimple('Verification','Trust information shown on your public provider profile.',[['Phone verification','Verified','Complete'],['Identity verification','Government ID required','Pending'],['Business verification','Optional for individuals','Not started']]);
  else if(r.path==='business')body=business();
- else if(r.path==='profile')body=providerDashboard();
+ else if(r.path==='profile')body=profilePage();
  else if(r.path==='login')body=auth('login');
  else if(r.path==='signup')body=auth('signup');
  else if(r.path==='forgot-password')body=forgot();
