@@ -50,7 +50,6 @@ function filter(){
  const el=document.getElementById('provider-results');if(el)el.innerHTML=list.length?list.map(providerCard).join(''):empty('No exact match yet','Try another search or post a custom task so providers can respond.','post-task');
 }
 function wire(){
- root.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>action(b.dataset.action)));
  document.getElementById('global-search')?.addEventListener('keydown',e=>{if(e.key==='Enter')action('search')});
  ['provider-search','provider-location','provider-sort'].forEach(id=>document.getElementById(id)?.addEventListener('input',filter));
 }
