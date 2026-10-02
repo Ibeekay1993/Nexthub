@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://nexthub.ng/sitemap.xml
