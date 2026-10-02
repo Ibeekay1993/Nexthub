@@ -33,6 +33,7 @@ function render(){
  else if(r.path==='provider'&&r.id==='earnings')body=providerSimple('Earnings & payouts','Review completed work and payout status.',[['Completed jobs','₦680,000','Available'],['Pending jobs','₦420,000','Pending'],['Platform fees','₦68,000','This month']]);
  else if(r.path==='provider'&&r.id==='verification')body=providerSimple('Verification','Trust information shown on your public provider profile.',[['Phone verification','Verified','Complete'],['Identity verification','Government ID required','Pending'],['Business verification','Optional for individuals','Not started']]);
  else if(r.path==='business')body=business();
+ else if(r.path==='profile')body=providerDashboard();
  else if(r.path==='login')body=auth('login');
  else if(r.path==='signup')body=auth('signup');
  else if(r.path==='forgot-password')body=forgot();
@@ -66,7 +67,9 @@ function bind(){
  document.querySelectorAll('[data-form="provider-search"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({query:d.q||''});go('/search?q='+encodeURIComponent(d.q||'')+'&location='+encodeURIComponent(d.location||''))}));
  document.querySelectorAll('[data-form="task"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));addTask(d);go('/jobs');alert('Task posted successfully in this browser demo.')}));
  document.querySelectorAll('[data-form="provider"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{name:d.name,location:d.location,role:'Provider'},providerDraft:d});go('/provider');alert('Provider profile saved locally.')}));
- document.querySelectorAll('[data-form="settings"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,...d}});alert('Settings saved.')}));
+ document.querySelectorAll('[data-form="settings"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,...d}});alert('Settings saved.')})); 
+ document.querySelectorAll('[data-form="auth"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({session:{email:d.email,role:d.role||'Customer'}});go('/profile');alert('Signed in for this browser demo. Connect Supabase Auth for production accounts.')}));
+ document.querySelectorAll('[data-form="forgot"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();alert('If this email exists, a password reset message would be sent by the production authentication service.')}));
  document.querySelectorAll('[data-action="demo-payment"]').forEach(b=>b.addEventListener('click',()=>alert('Payment methods will connect to the payment provider in the production backend.')));
  document.querySelectorAll('[data-action="save"]').forEach(b=>b.addEventListener('click',()=>{}));
 }
