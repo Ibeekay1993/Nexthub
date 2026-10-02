@@ -1,6 +1,6 @@
 import {CATEGORIES,PROVIDERS} from './data.js';
 import {getState,setState,addTask,toggleSaved,addRecent} from './state.js';
-import {layout,home,services,service,providers,provider,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,profilePage,forgot,adminSection,notFound} from './pages.js';
+import {layout,home,services,service,providers,provider,hire,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,profilePage,forgot,adminSection,notFound} from './pages.js';
 
 const root=document.getElementById('app');
 const go=path=>{location.hash=path.startsWith('#')?path:'#'+path};
@@ -13,7 +13,7 @@ function render(){
  else if(r.path==='search')body=providers();
  else if(r.path==='providers'&&!r.id)body=providers();
  else if(r.path==='providers'&&r.id)body=provider(PROVIDERS.find(p=>p.id===r.id));
- else if(r.path==='hire')body=provider(PROVIDERS.find(p=>p.id===r.id))||providers();
+ else if(r.path==='hire'&&r.id)body=hire(PROVIDERS.find(p=>p.id===r.id));
  else if(r.path==='tasks'&&r.id==='new')body=newTask();
  else if(r.path==='jobs'&&!r.id)body=tasks();
  else if(r.path==='jobs'&&r.id)body=taskDetail(r.id);
@@ -65,13 +65,13 @@ function providerCard(p){return '<article class="provider"><div class="p-top"><d
 function bind(){
  document.querySelectorAll('[data-form="search"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const q=new FormData(f).get('q')?.toString().trim()||'';setState({query:q});addRecent(q);go('/search?q='+encodeURIComponent(q))}));
  document.querySelectorAll('[data-form="provider-search"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({query:d.q||''});go('/search?q='+encodeURIComponent(d.q||'')+'&location='+encodeURIComponent(d.location||''))}));
- document.querySelectorAll('[data-form="task"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));addTask(d);go('/jobs');alert('Task posted successfully in this browser demo.')}));
+ document.querySelectorAll('[data-form="task"],[data-form="hire"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));addTask(d);go('/jobs');alert('Task posted successfully in this browser demo.')}));
  document.querySelectorAll('[data-form="provider"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{name:d.name,location:d.location,role:'Provider'},providerDraft:d});go('/provider');alert('Provider profile saved locally.')}));
  document.querySelectorAll('[data-form="settings"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,...d}});alert('Settings saved.')})); 
  document.querySelectorAll('[data-form="auth"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({session:{email:d.email,role:d.role||'Customer'}});go('/profile');alert('Signed in for this browser demo. Connect Supabase Auth for production accounts.')}));
  document.querySelectorAll('[data-form="forgot"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();alert('If this email exists, a password reset message would be sent by the production authentication service.')}));
  document.querySelectorAll('[data-action="demo-payment"]').forEach(b=>b.addEventListener('click',()=>alert('Payment methods will connect to the payment provider in the production backend.')));
- document.querySelectorAll('[data-action="save"]').forEach(b=>b.addEventListener('click',()=>{}));
+ document.querySelectorAll('[data-action="save"]').forEach(b=>b.addEventListener('click',()=>{toggleSaved(b.dataset.id);render()}));
 }
 window.addEventListener('hashchange',render);
 window.addEventListener('storage',render);
