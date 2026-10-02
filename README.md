@@ -1,27 +1,28 @@
 # Nexthub
 
-Nexthub is an open service marketplace for Nigeria. The product is designed around an extensible catalogue: providers can offer multiple services, customers can post custom work, and administrators can later moderate new service categories.
+Nexthub is an open Nigerian services marketplace for customers, independent providers and businesses.
 
-## Current architecture
+## Frontend architecture
 
-This first production-ready frontend uses a dependency-free ES module architecture so it can deploy directly to Netlify without a build step or framework lock-in.
+- assets/js/data.js — demo domain data
+- assets/js/state.js — browser state and persistence
+- assets/js/ui.js — shared UI helpers
+- assets/js/pages.js — page/presentation functions
+- assets/js/app.js — routing and event orchestration
+- assets/css/app.css — responsive design system
+- netlify.toml — Netlify SPA fallback
+- .github/workflows/quality.yml — JavaScript syntax validation
 
-- `index.html` — application shell and metadata
-- `assets/css/app.css` — design system and responsive layout
-- `assets/js/data.js` — marketplace taxonomy and seed data
-- `assets/js/state.js` — client state and local persistence
-- `assets/js/ui.js` — reusable rendering and modal helpers
-- `assets/js/app.js` — application routing, interactions and page composition
-- `netlify.toml` — Netlify SPA fallback and Node runtime
+## Functional frontend flows
 
-## Product architecture
+Service catalogue, provider search, location filtering, sorting, provider profiles, portfolios, ratings, saved providers, hire requests, custom task posting, browser-persistent jobs, customer settings, provider onboarding/workspace, business workspace, admin workspace and authentication UI.
 
-The UI is intentionally ready for a real backend. The eventual data model should use profiles, services, provider_services, service_requests, offers, bookings, messages, reviews, portfolios, verification_records, favourites, notifications, payments, disputes and audit_logs. The service catalogue should be data-driven rather than hard-coded into provider profiles.
+## Production boundary
 
-## Deployment
+The frontend is intentionally dependency-light for immediate Netlify deployment. Production functionality should replace demo browser state with Supabase Auth/Postgres/Storage behind a typed service layer.
 
-The repository can be deployed to Netlify as-is. Set the publish directory to the repository root. No environment variables are required for the current frontend demo.
+Recommended domains:
 
-## Production backend
+auth → profiles → services → provider_services → tasks → quotes → bookings → conversations/messages → reviews → payments/payouts → disputes → notifications → audit_logs
 
-When Supabase is connected, replace the local state adapter with repository/service modules for authentication, Postgres/RLS, Storage, messaging, notifications and payments. Keep UI components independent from Supabase so the backend can evolve without rewriting the marketplace.
+Keep realtime limited to active conversations and explicitly required job-status events. Never expose Supabase service-role keys, payment secrets or privileged credentials in browser code.
