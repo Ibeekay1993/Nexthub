@@ -68,4 +68,5 @@ function submitTask(e){e.preventDefault();const d=Object.fromEntries(new FormDat
 function submitProvider(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));setState({profile:{name:d.name,location:d.location,role:'Provider'}});closeModal();render();document.getElementById('profile')?.scrollIntoView();alert('Provider profile saved locally.')}
 function submitHire(e){e.preventDefault();const p=PROVIDERS.find(x=>x.id===e.target.provider.value);addTask({title:'Request for '+p.role,category:'Provider request',location:e.target.location.value,description:e.target.description.value,budget:e.target.budget.value,status:'Requested',provider:p.name});closeModal();render();document.getElementById('jobs')?.scrollIntoView();alert('Request saved. A production backend will deliver it to the provider.')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+root.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)action(b.dataset.action)});
 render();
