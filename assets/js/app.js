@@ -1,6 +1,6 @@
 import {CATEGORIES,PROVIDERS} from './data.js';
 import {getState,setState,addTask,toggleSaved,addRecent} from './state.js';
-import {layout,home,services,service,providers,provider,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin} from './pages.js';
+import {layout,home,services,service,providers,provider,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,forgot,adminSection,notFound} from './pages.js';
 
 const root=document.getElementById('app');
 const go=path=>{location.hash=path.startsWith('#')?path:'#'+path};
@@ -33,14 +33,26 @@ function render(){
  else if(r.path==='provider'&&r.id==='earnings')body=providerSimple('Earnings & payouts','Review completed work and payout status.',[['Completed jobs','₦680,000','Available'],['Pending jobs','₦420,000','Pending'],['Platform fees','₦68,000','This month']]);
  else if(r.path==='provider'&&r.id==='verification')body=providerSimple('Verification','Trust information shown on your public provider profile.',[['Phone verification','Verified','Complete'],['Identity verification','Government ID required','Pending'],['Business verification','Optional for individuals','Not started']]);
  else if(r.path==='business')body=business();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else if(r.path==='admin')body=admin();
- else body=home();
+ else if(r.path==='login')body=auth('login');
+ else if(r.path==='signup')body=auth('signup');
+ else if(r.path==='forgot-password')body=forgot();
+ else if(r.path==='admin'&&!r.id)body=admin();
+ else if(r.path==='admin'&&r.id==='users')body=adminSection('Users','Manage customer, provider and business accounts.',[['New provider account','Awaiting profile review','Review'],['Customer verification','3 accounts','Review'],['Suspended accounts','0','Clear']]);
+ else if(r.path==='admin'&&r.id==='services')body=adminSection('Service moderation','Review new services proposed by providers.',[['CCTV installation','Provider proposal','Pending'],['Solar panel cleaning','Provider proposal','Pending'],['New category request','Customer suggestion','Pending']]);
+ else if(r.path==='admin'&&r.id==='verification')body=adminSection('Verification queue','Review submitted identity and business evidence.',[['Provider identity','ID submitted','Pending'],['Business registration','CAC document','Pending'],['Qualification','Certificate submitted','Pending']]);
+ else if(r.path==='admin'&&r.id==='jobs')body=adminSection('Jobs','Monitor marketplace requests and bookings.',[['Generator servicing','Booking #NX-1002','Active'],['Office cleaning','Booking #NX-1003','Completed']]);
+ else if(r.path==='admin'&&r.id==='disputes')body=adminSection('Disputes','Review customer/provider disputes and evidence.',[['Scope dispute','Customer vs provider','Open'],['Late arrival','Customer report','Open']]);
+ else if(r.path==='admin'&&r.id==='payments')body=adminSection('Payments','Monitor transaction and payout operations.',[['Pending payout','Provider payout','Review'],['Successful payment','₦35,000','Complete']]);
+ else if(r.path==='admin'&&r.id==='reports')body=adminSection('Reports','Marketplace operational reporting.',[['Monthly jobs','1,420 jobs','Ready'],['Provider growth','+18%','Ready'],['Dispute rate','2.1%','Ready']]);
+ else if(r.path==='admin'&&r.id==='settings')body=adminSection('Platform settings','Operational controls and moderation settings.',[['Service proposal moderation','Enabled','Active'],['Provider verification','Required for badge','Active']]);
+
+
+
+
+
+
+
+ else body=notFound();
  root.innerHTML=layout(body); bind(); hydrate(r);
 }
 function hydrate(r){
