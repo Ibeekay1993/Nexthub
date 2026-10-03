@@ -1,78 +1,73 @@
 import {CATEGORIES,PROVIDERS} from './data.js';
-import {getState,setState,addTask,toggleSaved,addRecent} from './state.js';
-import {layout,home,services,service,providers,provider,hire,tasks,taskDetail,newTask,messages,notifications,saved,reviews,payments,settings,onboarding,providerDashboard,providerServices,providerSimple,business,admin,auth,profilePage,forgot,adminSection,notFound} from './pages.js';
+import {getState,setState,addTask,addRecent,toggleSaved,updateTask} from './state.js';
+import * as P from './pages.js';
 
 const root=document.getElementById('app');
-const go=path=>{location.hash=path.startsWith('#')?path:'#'+path};
-function parse(){const raw=location.hash.replace(/^#/,'')||'/';const [path,...parts]=raw.split('?')[0].split('/').filter(Boolean);const q=new URLSearchParams(raw.split('?')[1]||'');return {path:path||'',id:parts[0],sub:parts[1],q}}
+const route=()=>{const raw=location.hash.replace(/^#/,'')||'/';const [path,...rest]=raw.split('?');const q=new URLSearchParams(rest.join('?'));const parts=path.split('/').filter(Boolean);return {path:'/'+(parts[0]||''),id:parts[1]||'',q}};
+const go=p=>{location.hash=p};
+
 function render(){
- const r=parse(); let body;
- if(!r.path)body=home();
- else if(r.path==='services'&&!r.id)body=services();
- else if(r.path==='services'&&r.id)body=service(CATEGORIES.find(c=>c.id===r.id));
- else if(r.path==='search')body=providers();
- else if(r.path==='providers'&&!r.id)body=providers();
- else if(r.path==='providers'&&r.id)body=provider(PROVIDERS.find(p=>p.id===r.id));
- else if(r.path==='hire'&&r.id)body=hire(PROVIDERS.find(p=>p.id===r.id));
- else if(r.path==='tasks'&&r.id==='new')body=newTask();
- else if(r.path==='jobs'&&!r.id)body=tasks();
- else if(r.path==='jobs'&&r.id)body=taskDetail(r.id);
- else if(r.path==='messages')body=messages();
- else if(r.path==='notifications')body=notifications();
- else if(r.path==='saved')body=saved();
- else if(r.path==='reviews')body=reviews();
- else if(r.path==='payments')body=payments();
- else if(r.path==='settings')body=settings();
- else if(r.path==='provider'&&!r.id)body=providerDashboard();
- else if(r.path==='provider'&&r.id==='onboarding')body=onboarding();
- else if(r.path==='provider'&&r.id==='services')body=providerServices();
- else if(r.path==='provider'&&r.id==='portfolio')body=providerSimple('Portfolio','Work examples customers can review before contacting you.',[['Generator installation','Completed project','Published'],['Preventive maintenance','Residential project','Published']]);
- else if(r.path==='provider'&&r.id==='leads')body=providerSimple('Leads','Customer requests matching your services.',[['AC repair in Ikeja','Customer request','New'],['Generator maintenance','Recurring request','New'],['Office cooling service','Commercial request','Review']]);
- else if(r.path==='provider'&&r.id==='quotes')body=providerSimple('Quotes','Offers you have sent to customers.',[['Generator servicing','₦35,000','Pending'],['AC installation','₦120,000','Accepted']]);
- else if(r.path==='provider'&&r.id==='jobs')body=providerSimple('Provider jobs','Work scheduled or completed.',[['Generator servicing','Tomorrow · Ikeja','Upcoming'],['AC repair','Completed yesterday','Completed']]);
- else if(r.path==='provider'&&r.id==='earnings')body=providerSimple('Earnings & payouts','Review completed work and payout status.',[['Completed jobs','₦680,000','Available'],['Pending jobs','₦420,000','Pending'],['Platform fees','₦68,000','This month']]);
- else if(r.path==='provider'&&r.id==='verification')body=providerSimple('Verification','Trust information shown on your public provider profile.',[['Phone verification','Verified','Complete'],['Identity verification','Government ID required','Pending'],['Business verification','Optional for individuals','Not started']]);
- else if(r.path==='business')body=business();
- else if(r.path==='profile')body=profilePage();
- else if(r.path==='login')body=auth('login');
- else if(r.path==='signup')body=auth('signup');
- else if(r.path==='forgot-password')body=forgot();
- else if(r.path==='admin'&&!r.id)body=admin();
- else if(r.path==='admin'&&r.id==='users')body=adminSection('Users','Manage customer, provider and business accounts.',[['New provider account','Awaiting profile review','Review'],['Customer verification','3 accounts','Review'],['Suspended accounts','0','Clear']]);
- else if(r.path==='admin'&&r.id==='services')body=adminSection('Service moderation','Review new services proposed by providers.',[['CCTV installation','Provider proposal','Pending'],['Solar panel cleaning','Provider proposal','Pending'],['New category request','Customer suggestion','Pending']]);
- else if(r.path==='admin'&&r.id==='verification')body=adminSection('Verification queue','Review submitted identity and business evidence.',[['Provider identity','ID submitted','Pending'],['Business registration','CAC document','Pending'],['Qualification','Certificate submitted','Pending']]);
- else if(r.path==='admin'&&r.id==='jobs')body=adminSection('Jobs','Monitor marketplace requests and bookings.',[['Generator servicing','Booking #NX-1002','Active'],['Office cleaning','Booking #NX-1003','Completed']]);
- else if(r.path==='admin'&&r.id==='disputes')body=adminSection('Disputes','Review customer/provider disputes and evidence.',[['Scope dispute','Customer vs provider','Open'],['Late arrival','Customer report','Open']]);
- else if(r.path==='admin'&&r.id==='payments')body=adminSection('Payments','Monitor transaction and payout operations.',[['Pending payout','Provider payout','Review'],['Successful payment','₦35,000','Complete']]);
- else if(r.path==='admin'&&r.id==='reports')body=adminSection('Reports','Marketplace operational reporting.',[['Monthly jobs','1,420 jobs','Ready'],['Provider growth','+18%','Ready'],['Dispute rate','2.1%','Ready']]);
- else if(r.path==='admin'&&r.id==='settings')body=adminSection('Platform settings','Operational controls and moderation settings.',[['Service proposal moderation','Enabled','Active'],['Provider verification','Required for badge','Active']]);
-
-
-
-
-
-
-
- else body=notFound();
- root.innerHTML=layout(body); bind(); hydrate(r);
+ const r=route();let body='';
+ if(r.path==='/')body=P.home();
+ else if(r.path==='/services'&&!r.id)body=P.services();
+ else if(r.path==='/services'&&r.id)body=P.service(CATEGORIES.find(c=>c.id===decodeURIComponent(r.id)));
+ else if(r.path==='/search')body=P.search();
+ else if(r.path==='/providers'&&!r.id)body=P.providers();
+ else if(r.path==='/providers'&&r.id)body=P.provider(PROVIDERS.find(p=>p.id===decodeURIComponent(r.id)));
+ else if(r.path==='/hire')body=P.hire(PROVIDERS.find(p=>p.id===decodeURIComponent(r.id)));
+ else if(r.path==='/tasks/new')body=P.newTask();
+ else if(r.path==='/jobs'&&!r.id)body=P.tasks();
+ else if(r.path==='/jobs'&&r.id)body=P.taskDetail(decodeURIComponent(r.id));
+ else if(r.path==='/messages')body=P.messages();
+ else if(r.path==='/notifications')body=P.notifications();
+ else if(r.path==='/saved')body=P.saved();
+ else if(r.path==='/reviews')body=P.reviews();
+ else if(r.path==='/payments')body=P.payments();
+ else if(r.path==='/profile')body=P.profilePage();
+ else if(r.path==='/settings')body=P.settings();
+ else if(r.path==='/login')body=P.auth?.('login')||'';
+ else if(r.path==='/signup')body=P.auth?.('signup')||'';
+ else if(r.path==='/forgot-password')body=P.forgot();
+ else if(r.path==='/provider')body=P.providerDashboard();
+ else if(r.path==='/provider/onboarding')body=P.onboarding();
+ else if(r.path==='/provider/services')body=P.providerServices();
+ else if(r.path==='/provider/portfolio')body=P.providerSimple('Portfolio','Show the work that makes customers trust you.',[['CCTV installations','8 work examples','Published'],['Office networks','5 work examples','Published'],['Access control','3 work examples','Draft']]);
+ else if(r.path==='/provider/leads')body=P.providerSimple('Leads','Customer requests that may match your services.',[['Office CCTV installation','Gwarinpa · ₦180,000 budget','New'],['Generator maintenance','Ikeja · Recurring','New'],['Network troubleshooting','Abuja · Quote requested','Follow up']]);
+ else if(r.path==='/provider/quotes')body=P.providerSimple('Quotes','Manage offers sent to customers.',[['Generator servicing','₦35,000 · awaiting customer','Pending'],['Office network setup','₦220,000 · accepted','Accepted'],['CCTV maintenance','₦45,000 · completed','Completed']]);
+ else if(r.path==='/provider/jobs')body=P.providerSimple('Jobs','Track accepted work, updates and completion.',[['Generator servicing','Job #NX-1048 · 70% complete','In progress'],['Office network setup','Job #NX-1021 · payment received','Scheduled'],['CCTV maintenance','Job #NX-998 · completed','Completed']]);
+ else if(r.path==='/provider/earnings')body=P.providerSimple('Earnings & settlement','Separate customer payment, platform fees and provider settlement.',[['Available for payout','₦280,000','Ready'],['Pending settlement','₦140,000','Pending'],['Platform fees','₦68,000','This month']]);
+ else if(r.path==='/provider/verification')body=P.providerSimple('Verification','Trust information shown on your provider profile.',[['Phone verification','Verified','Complete'],['Identity verification','Government ID submitted','Pending'],['Business verification','Optional for individuals','Not started']]);
+ else if(r.path==='/business')body=P.business();
+ else if(r.path==='/admin'&&!r.id)body=P.admin();
+ else if(r.path==='/admin'&&r.id==='users')body=P.adminSection('Users','Manage customer, provider and business accounts.',[['Provider accounts','18 awaiting profile review','Review'],['Customer verification','3 accounts flagged','Review'],['Suspended accounts','0 currently suspended','Clear']]);
+ else if(r.path==='/admin'&&r.id==='services')body=P.adminSection('Service moderation','Approve new services and categories without changing application code.',[['CCTV maintenance','Provider proposal','Pending'],['Solar panel cleaning','Provider proposal','Pending'],['New category request','Customer suggestion','Pending']]);
+ else if(r.path==='/admin'&&r.id==='verification')body=P.adminSection('Verification queue','Review identity, business and qualification evidence.',[['Provider identity','ID submitted','Pending'],['Business registration','CAC document','Pending'],['Qualification','Certificate submitted','Pending']]);
+ else if(r.path==='/admin'&&r.id==='jobs')body=P.adminSection('Jobs','Monitor requests, bookings, active work and completion.',[['Generator servicing','Job #NX-1048','In progress'],['Office cleaning','Job #NX-1003','Completed'],['CCTV installation','Job #NX-1052','Payment pending']]);
+ else if(r.path==='/admin'&&r.id==='disputes')body=P.adminSection('Disputes','Review evidence, customer reports and provider responses.',[['Scope dispute','Customer vs provider','Open'],['Late arrival','Customer report','Open'],['Additional charge','Provider request','Review']]);
+ else if(r.path==='/admin'&&r.id==='payments')body=P.adminSection('Payments','Monitor transactions, settlements, refunds and payouts.',[['Provider payout','₦280,000','Ready'],['Customer payment','₦35,000','Complete'],['Refund request','₦18,000','Review']]);
+ else if(r.path==='/admin'&&r.id==='reports')body=P.adminSection('Reports','Marketplace operational reporting.',[['GMV','₦84.2m this month','Ready'],['Completed jobs','38,900','Ready'],['Dispute rate','1.8%','Ready']]);
+ else if(r.path==='/admin'&&r.id==='settings')body=P.adminSection('Platform settings','Controls for moderation, fees, verification and operations.',[['Service proposals','Moderation enabled','Active'],['Provider verification','Required for badge','Active'],['Marketplace fee','Configurable','Active']]);
+ else body=P.notFound();
+ root.innerHTML=P.layout(body);bind();
 }
-function hydrate(r){
- const q=r.q.get('q')||getState().query;
- const field=document.querySelector('[name="q"]');if(field&&q)field.value=q;
- if(r.path==='search'&&q){setState({query:q});const loc=r.q.get('location')||'';const term=q.toLowerCase();const locTerm=loc.toLowerCase();const list=PROVIDERS.filter(p=>(p.name+' '+p.role+' '+p.location+' '+p.skills.join(' ')+' '+p.services.join(' ')).toLowerCase().includes(term)&&(!locTerm||p.location.toLowerCase().includes(locTerm)));const grid=document.querySelector('.provider-grid');if(grid)grid.innerHTML=list.length?list.map(p=>providerCard(p)).join(''):'<div class="empty"><div class="empty-mark">+</div><h3>No exact provider yet</h3><p>Post a custom task and let providers respond.</p><a class="btn primary" href="#/tasks/new">Post task</a></div>'; }
+
+function filterProviders(q,location,sort){
+ let list=[...PROVIDERS];const term=String(q||'').toLowerCase().trim(),loc=String(location||'').toLowerCase().trim();
+ if(term)list=list.filter(p=>(p.name+' '+p.role+' '+p.location+' '+p.skills.join(' ')+' '+p.services.join(' ')).toLowerCase().includes(term));
+ if(loc)list=list.filter(p=>p.location.toLowerCase().includes(loc));
+ if(sort==='rating')list.sort((a,b)=>b.rating-a.rating);if(sort==='jobs')list.sort((a,b)=>b.jobs-a.jobs);return list;
 }
-function providerCard(p){return '<article class="provider"><div class="p-top"><div class="avatar">'+p.name.split(' ').map(x=>x[0]).join('').slice(0,2)+'</div><div><b>'+p.name+'</b> <span class="verified">Verified</span><div class="muted">'+p.role+'</div><div class="rating">★ '+p.rating+' · '+p.jobs+' jobs</div></div></div><p>'+p.bio+'</p><div class="tags">'+p.skills.map(x=>'<span class="tag">'+x+'</span>').join('')+'</div><div class="provider-foot"><span class="muted">'+p.location+'</span><a class="btn primary" href="#/providers/'+p.id+'">View profile</a></div></article>'}
+
 function bind(){
- document.querySelectorAll('[data-form="search"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const q=new FormData(f).get('q')?.toString().trim()||'';setState({query:q});addRecent(q);go('/search?q='+encodeURIComponent(q))}));
- document.querySelectorAll('[data-form="provider-search"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({query:d.q||''});go('/search?q='+encodeURIComponent(d.q||'')+'&location='+encodeURIComponent(d.location||''))}));
- document.querySelectorAll('[data-form="task"],[data-form="hire"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));addTask(d);go('/jobs');alert('Task posted successfully in this browser demo.')}));
- document.querySelectorAll('[data-form="provider"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{name:d.name,location:d.location,role:'Provider'},providerDraft:d});go('/provider');alert('Provider profile saved locally.')}));
- document.querySelectorAll('[data-form="settings"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,...d}});alert('Settings saved.')})); 
- document.querySelectorAll('[data-form="auth"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({session:{email:d.email,role:d.role||'Customer'}});go('/profile');alert('Signed in for this browser demo. Connect Supabase Auth for production accounts.')}));
- document.querySelectorAll('[data-form="forgot"]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();alert('If this email exists, a password reset message would be sent by the production authentication service.')}));
- document.querySelectorAll('[data-action="demo-payment"]').forEach(b=>b.addEventListener('click',()=>alert('Payment methods will connect to the payment provider in the production backend.')));
- document.querySelectorAll('[data-action="save"]').forEach(b=>b.addEventListener('click',()=>{toggleSaved(b.dataset.id);render()}));
+ document.querySelectorAll('[data-action="menu"]').forEach(b=>b.onclick=()=>document.getElementById('mobile-nav')?.classList.toggle('open'));
+ document.querySelectorAll('[data-action="save"]').forEach(b=>b.onclick=()=>{toggleSaved(b.dataset.id);render()});
+ document.querySelectorAll('[data-form="search"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({query:d.q||'',location:d.location||''});addRecent(d.q);go('/search?q='+encodeURIComponent(d.q||''))});
+ document.querySelectorAll('[data-form="provider-search"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({query:d.q||'',location:d.location||''});const list=filterProviders(d.q,d.location,d.sort);const targets=[document.getElementById('provider-results'),document.getElementById('search-results')].filter(Boolean);targets.forEach(t=>{t.innerHTML=list.length?list.map(p=>P.__providerCard?.(p)||'').join(''):'<div class="empty">No matching providers. Try a broader search or post a task.</div>'});const count=document.getElementById('search-count');if(count)count.textContent=list.length+' matches';if(!targets.length)go('/search?q='+encodeURIComponent(d.q||'')+'&location='+encodeURIComponent(d.location||''));});
+ document.querySelectorAll('[data-form="task"],[data-form="hire"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));const item=addTask(d);alert('Task request created in this demo. No real payment has been taken.');go('/jobs/'+item.id)});
+ document.querySelectorAll('[data-form="provider"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,name:d.name,location:d.location,role:'Provider'},providerDraft:d});alert('Provider profile saved in this browser demo.');go('/provider')});
+ document.querySelectorAll('[data-form="settings"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({profile:{...getState().profile,name:d.name,location:d.location,notifications:d.notifications}});alert('Settings saved.');render()});
+ document.querySelectorAll('[data-form="auth"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));setState({session:{user:d.email,role:d.role||'Customer'},profile:{...getState().profile,name:d.email.split('@')[0]||'Nexthub user',role:d.role||'Customer'}});go('/profile')});
+ document.querySelectorAll('[data-form="forgot"]').forEach(f=>f.onsubmit=e=>{e.preventDefault();alert('Demo reset request recorded. Production authentication will send the actual email.');});
+ document.querySelectorAll('[data-action="demo-complete"]').forEach(b=>b.onclick=()=>alert('Completion review: inspect provider notes/photos, then Confirm completion or Report a problem. Production will release settlement only after the configured completion/dispute rules.'));
 }
-window.addEventListener('hashchange',render);
-window.addEventListener('storage',render);
-render();
+window.addEventListener('hashchange',render);window.addEventListener('storage',render);render();
