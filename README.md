@@ -1,28 +1,37 @@
 # Nexthub
 
-Nexthub is an open Nigerian services marketplace for customers, independent providers and businesses.
+Nexthub is a Nigerian marketplace concept for finding and offering local services, trade work, errands, transport, and remote professional services.
 
-## Frontend architecture
+## Run locally
 
-- assets/js/data.js — demo domain data
-- assets/js/state.js — browser state and persistence
-- assets/js/ui.js — shared UI helpers
-- assets/js/pages.js — page/presentation functions
-- assets/js/app.js — routing and event orchestration
-- assets/css/app.css — responsive design system
-- netlify.toml — Netlify SPA fallback
-- .github/workflows/quality.yml — JavaScript syntax validation
+Requires Node.js 20 or later.
 
-## Functional frontend flows
+```sh
+npm ci
+npm run dev
+npm run check
+npm run build
+npm run preview
+```
 
-Service catalogue, provider search, location filtering, sorting, provider profiles, portfolios, ratings, saved providers, hire requests, custom task posting, browser-persistent jobs, customer settings, provider onboarding/workspace, business workspace, admin workspace and authentication UI.
+## Frontend structure
 
-## Production boundary
+- `src/domain.ts` — marketplace types and clearly labeled sample records.
+- `src/store.ts` — browser-only demo state. This is not an API, auth system, ledger, or source of truth.
+- `src/App.tsx` — route table and shared layout.
+- `src/components.tsx` — shared navigation, metadata, search, provider cards, and empty states.
+- `src/features/Discovery.tsx` — marketplace search, category catalogue, and sample provider profiles.
+- `src/features/Requests.tsx` — demo task, quote, job, change approval, completion, and dispute flows.
+- `src/features/Workspaces.tsx` — provider, business, and operations preview screens.
+- `src/features/Account.tsx` — local demo messaging, saved profiles, and account boundaries.
+- `src/app.css` — design tokens, components, responsive layouts, focus states, and reduced-motion support.
+- `public/` — redirects, crawl rules, sitemap, and response headers for the static Netlify site.
+- `docs/PRODUCT-REVIEW-AND-IMPLEMENTATION-PLAN.md` — repository findings, architecture decision, domain model, journeys, and phases.
 
-The frontend is intentionally dependency-light for immediate Netlify deployment. Production functionality should replace demo browser state with Supabase Auth/Postgres/Storage behind a typed service layer.
+## Demo boundary
 
-Recommended domains:
+Listings, jobs, and local interactions exist to preview the product. They stay in the current browser and are not sent to service providers. Sign-in, identity verification, secure uploads, real-time messaging, payments, refunds, disputes administration, settlements, and payouts are not connected. No payment or identity claims should be inferred from this site.
 
-auth → profiles → services → provider_services → tasks → quotes → bookings → conversations/messages → reviews → payments/payouts → disputes → notifications → audit_logs
+## Production integration
 
-Keep realtime limited to active conversations and explicitly required job-status events. Never expose Supabase service-role keys, payment secrets or privileged credentials in browser code.
+Production needs Supabase Auth and PostgreSQL with row-level security, controlled storage, and server-side functions for role checks and state transitions. A Nigerian gateway must create and verify transactions on the server. Keep payment transactions, job allocations, platform fees, provider settlements, payouts, refunds, and disputes as separate records. The frontend must not set trusted amounts, role claims, or settlement values.
