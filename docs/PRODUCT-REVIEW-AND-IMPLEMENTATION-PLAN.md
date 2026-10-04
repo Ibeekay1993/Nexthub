@@ -123,7 +123,7 @@ The frontend includes provider and business examples without invented ratings or
 
 **Not completed / production blockers:** There is no configured backend or authorized account for authentication, durable multi-user persistence, private uploads, real messaging/notifications, identity/business checks, payments, refunds, dispute adjudication, settlements, payouts, or business role permissions. Admin screens are previews, not privileged controls. Provider, review, and job records remain illustrative examples. Frontend React routes are client-rendered; static Netlify hosting alone does not prerender each category page. Production launch still requires backend integration, security review, real content, broader mobile/accessibility QA, automated workflow tests, and a deployment check.
 
-**Deployment status:** No deployment was performed. During the original review, the supplied Netlify URL displayed a blank page and still served the legacy build when fetched. The source changes here are local and do not repair the hosted URL until the project is deployed with the updated Netlify build settings.
+**Deployment status:** The legacy frontend was initially replaced and deployed from GitHub commit `2debe75`. The workspace separation follow-up was pushed in `ba50c6e`; Netlify auto-deployed its new hashed assets, and the public `/customer` route rendered with the new customer workspace navigation during verification. The original legacy deployment at the supplied URL was blank; that issue was addressed by the first deployment.
 
 ## Workspace separation follow-up
 
