@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import type { Provider } from './domain';
-import { toggleSaved, useDemoState } from './store';
+import type { Provider, Role } from './domain';
+import { setRole, toggleSaved, useDemoState } from './store';
 export function Icon({ name }: { name: 'search' | 'pin' | 'arrow' | 'check' | 'menu' | 'heart' }) {
   const paths = {
     search: <><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></>,
@@ -16,22 +16,46 @@ export function Icon({ name }: { name: 'search' | 'pin' | 'arrow' | 'check' | 'm
 export function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const state = useDemoState();
+  const routeWorkspace = workspaceForPath(location.pathname);
+  const activeWorkspace = routeWorkspace ?? (location.pathname === '/account' ? state.role : 'Customer');
+  const workspaceHref: Record<Role, string> = { Customer: '/customer', Provider: '/provider', Business: '/business', Admin: '/admin' };
+  const workspaceNav = workspaceNavigation[activeWorkspace];
   useEffect(() => {
     setMenuOpen(false);
     window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     document.getElementById('main')?.focus({ preventScroll: true });
   }, [location.pathname]);
+  useEffect(() => { if (routeWorkspace && state.role !== routeWorkspace) setRole(routeWorkspace); }, [routeWorkspace, state.role]);
+  function switchWorkspace(role: Role) { setRole(role); navigate(workspaceHref[role]); }
   return <><a className="skip-link" href="#main">Skip to content</a>
     <div className="demo-bar"><span className="demo-dot"/> Demo marketplace <span className="demo-divider">·</span> Sample profiles and browser-only changes. No payment or identity checks.</div>
     <header className="header"><Link className="wordmark" to="/" aria-label="Nexthub home">next<span>hub</span></Link>
-      <nav className="desktop-nav" aria-label="Main navigation"><NavLink to="/services">Services</NavLink><NavLink to="/providers">Providers</NavLink><NavLink to="/post-a-task">Post a task</NavLink><NavLink to="/provider">Offer a service</NavLink></nav>
-      <div className="header-actions"><Link className="saved-link" to="/saved" aria-label={`Saved providers, ${state.saved.length}`}><Icon name="heart"/><span>{state.saved.length}</span></Link><Link className="button button-light account-link" to="/account">My account</Link><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen}><Icon name="menu"/></button></div>
+      <nav className="desktop-nav" aria-label={`${activeWorkspace} navigation`}>{(routeWorkspace ? workspaceNav.primary : publicNavigation).map(([to, label]) => <NavLink to={to} key={to}>{label}</NavLink>)}</nav>
+      <div className="header-actions"><label className="workspace-picker"><span className="sr-only">Switch workspace preview</span><select aria-label="Switch workspace preview" value={activeWorkspace} onChange={(event) => switchWorkspace(event.target.value as keyof typeof workspaceHref)}>{Object.keys(workspaceHref).map((role) => <option key={role} value={role}>{role} workspace</option>)}</select></label><Link className="button button-light account-link" to="/account">Account</Link><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen}><Icon name="menu"/></button></div>
     </header>
-    {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation"><Link to="/services">Services</Link><Link to="/providers">Providers</Link><Link to="/post-a-task">Post a task</Link><Link to="/provider">Offer a service</Link><Link to="/account">My account</Link></nav>}
-    <main id="main" tabIndex={-1}>{children}</main>
-    <footer className="footer"><div className="footer-inner"><div><Link className="wordmark wordmark-inverse" to="/">next<span>hub</span></Link><p>Services, people and businesses across Nigeria.</p></div><div><b>Find help</b><Link to="/services">Browse services</Link><Link to="/providers">Browse providers</Link><Link to="/post-a-task">Post a task</Link></div><div><b>Offer services</b><Link to="/provider">Provider workspace</Link><Link to="/provider/onboarding">Create a profile</Link></div><div><b>Your account</b><Link to="/jobs">My requests</Link><Link to="/saved">Saved providers</Link><Link to="/admin">Operations demo</Link></div></div><div className="footer-base">© 2026 Nexthub · Demo experience. Secure payments and identity checks are not connected.</div></footer>
+    {menuOpen && <nav className="mobile-nav" aria-label={`${activeWorkspace} navigation`}>{(routeWorkspace ? workspaceNav.primary : publicNavigation).map(([to, label]) => <Link to={to} key={to}>{label}</Link>)}<Link to="/account">Account</Link></nav>}
+    {routeWorkspace && <div className="workspace-frame"><aside className="workspace-rail" aria-label={`${activeWorkspace} workspace sections`}><p className="workspace-rail-title">{activeWorkspace} workspace</p>{workspaceNav.all.map(([to, label]) => <NavLink end={to === workspaceHref[activeWorkspace]} to={to} key={to}>{label}</NavLink>)}</aside><main id="main" className="workspace-content" tabIndex={-1}>{children}</main></div>}
+    {!routeWorkspace && <main id="main" tabIndex={-1}>{children}</main>}
+    <footer className="footer">{routeWorkspace ? <div className="footer-inner workspace-footer"><div><Link className="wordmark wordmark-inverse" to="/">next<span>hub</span></Link><p>{activeWorkspace} workspace preview</p></div><div><b>{activeWorkspace} workspace</b>{workspaceNav.primary.map(([to, label]) => <Link to={to} key={to}>{label}</Link>)}</div><div><b>Account</b><Link to="/account">Account and workspace switcher</Link></div></div> : <div className="footer-inner"><div><Link className="wordmark wordmark-inverse" to="/">next<span>hub</span></Link><p>Services, people and businesses across Nigeria.</p></div><div><b>Find help</b><Link to="/services">Browse services</Link><Link to="/providers">Browse providers</Link><Link to="/post-a-task">Post a task</Link></div><div><b>Offer services</b><Link to="/provider">Provider workspace</Link><Link to="/provider/onboarding">Create a profile</Link></div><div><b>Your account</b><Link to="/customer">Customer workspace</Link><Link to="/account">Workspace switcher</Link></div></div>}<div className="footer-base">© 2026 Nexthub · Demo experience. Secure payments and identity checks are not connected.</div></footer>
   </>;
+}
+
+const publicNavigation: [string, string][] = [['/services', 'Services'], ['/providers', 'Providers'], ['/post-a-task', 'Request a service'], ['/provider/onboarding', 'Offer a service']];
+type WorkspaceNavigation = { primary: [string, string][]; all: [string, string][] };
+const workspaceNavigation: Record<Role, WorkspaceNavigation> = {
+  Customer: { primary: [['/customer', 'Overview'], ['/services', 'Find services'], ['/customer/requests', 'My requests'], ['/customer/jobs', 'My jobs']], all: [['/customer', 'Overview'], ['/services', 'Find services'], ['/customer/requests', 'My requests'], ['/customer/jobs', 'My jobs'], ['/messages', 'Messages'], ['/saved', 'Saved providers'], ['/payments', 'Payments'], ['/reviews', 'Reviews'], ['/customer/account', 'Account']] },
+  Provider: { primary: [['/provider', 'Dashboard'], ['/provider/leads', 'Requests'], ['/provider/jobs', 'Jobs'], ['/provider/services', 'Services']], all: [['/provider', 'Dashboard'], ['/provider/leads', 'Requests / leads'], ['/provider/quotes', 'Quotes'], ['/provider/jobs', 'Jobs'], ['/provider/calendar', 'Calendar'], ['/provider/services', 'Services'], ['/provider/availability', 'Availability'], ['/provider/portfolio', 'Portfolio'], ['/provider/earnings', 'Earnings'], ['/provider/reviews', 'Reviews'], ['/provider/verification', 'Verification'], ['/provider/messages', 'Messages'], ['/provider/settings', 'Provider settings']] },
+  Business: { primary: [['/business', 'Overview'], ['/business/requests', 'Requests'], ['/business/jobs', 'Jobs'], ['/business/team', 'Team']], all: [['/business', 'Overview'], ['/business/requests', 'Requests'], ['/business/jobs', 'Jobs'], ['/business/team', 'Team'], ['/business/services', 'Services'], ['/business/service-areas', 'Service areas'], ['/business/schedule', 'Schedule'], ['/business/customers', 'Customers'], ['/business/earnings', 'Earnings'], ['/business/payouts', 'Payouts'], ['/business/reviews', 'Reviews'], ['/business/verification', 'Verification'], ['/business/settings', 'Business settings']] },
+  Admin: { primary: [['/admin', 'Overview'], ['/admin/users', 'Users'], ['/admin/providers', 'Providers'], ['/admin/disputes', 'Disputes']], all: [['/admin', 'Overview'], ['/admin/users', 'Users'], ['/admin/providers', 'Providers'], ['/admin/businesses', 'Businesses'], ['/admin/services', 'Services'], ['/admin/verification', 'Verification'], ['/admin/jobs', 'Jobs'], ['/admin/payments', 'Payments'], ['/admin/disputes', 'Disputes'], ['/admin/reviews', 'Reviews'], ['/admin/reports', 'Reports'], ['/admin/notifications', 'Notifications'], ['/admin/audit', 'Audit logs'], ['/admin/settings', 'Platform settings']] },
+};
+function workspaceForPath(path: string): Role | null {
+  if (path === '/provider' || path.startsWith('/provider/')) return 'Provider';
+  if (path === '/business' || path.startsWith('/business/')) return 'Business';
+  if (path === '/admin' || path.startsWith('/admin/')) return 'Admin';
+  if (path === '/customer' || path.startsWith('/customer/') || ['/services', '/providers', '/jobs', '/post-a-task', '/saved', '/payments', '/reviews', '/messages', '/notifications'].some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) return 'Customer';
+  return null;
 }
 
 

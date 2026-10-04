@@ -20,10 +20,11 @@ npm run preview
 - `src/store.ts` — browser-only demo state. This is not an API, auth system, ledger, or source of truth.
 - `src/App.tsx` — route table and shared layout.
 - `src/components.tsx` — shared navigation, metadata, search, provider cards, and empty states.
+- `src/features/CustomerWorkspace.tsx` — buyer dashboard, requests, jobs, and shortcuts.
 - `src/features/Discovery.tsx` — marketplace search, category catalogue, and sample provider profiles.
 - `src/features/Requests.tsx` — demo task, quote, job, change approval, completion, and dispute flows.
-- `src/features/Workspaces.tsx` — provider, business, and operations preview screens.
-- `src/features/Account.tsx` — local demo messaging, saved profiles, and account boundaries.
+- `src/features/Workspaces.tsx` — separate provider, business, and admin workspace previews.
+- `src/features/Account.tsx` — account identity boundary, workspace selection, and local demo messaging.
 - `src/app.css` — design tokens, components, responsive layouts, focus states, and reduced-motion support.
 - `public/` — redirects, crawl rules, sitemap, and response headers for the static Netlify site.
 - `docs/PRODUCT-REVIEW-AND-IMPLEMENTATION-PLAN.md` — repository findings, architecture decision, domain model, journeys, and phases.
@@ -31,6 +32,8 @@ npm run preview
 ## Demo boundary
 
 Listings, jobs, and local interactions exist to preview the product. They stay in the current browser and are not sent to service providers. Sign-in, identity verification, secure uploads, real-time messaging, payments, refunds, disputes administration, settlements, and payouts are not connected. No payment or identity claims should be inferred from this site.
+
+The app keeps the customer, provider, business, and admin workspaces visually and navigationally separate. Selecting a workspace changes the local preview only; it is not a permission check. Job detail routes also stay inside each workspace. A single account with multiple capabilities is a production identity model, not an implemented authentication feature.
 
 ## Production integration
 

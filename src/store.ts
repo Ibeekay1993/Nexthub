@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { sampleJobs, type DemoState, type Job, type Role } from './domain';
 
-const key = 'nexthub:marketplace-demo:v1';
+const key = 'nexthub:marketplace-demo:v2';
 const initial: DemoState = { role: 'Customer', saved: [], jobs: sampleJobs, proposals: [] };
 let state: DemoState = read();
 const listeners = new Set<() => void>();
